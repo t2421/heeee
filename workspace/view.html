@@ -1,0 +1,159 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>view</title>
+  <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+  <script src="js/util.js"></script>
+  <script src="js/processing-1.4.1.min.js"></script>
+  <script src="http://localhost:7771/socket.io/socket.io.js"></script>
+<script>
+  var socket = io.connect('http://localhost:7771');
+
+  var backColor = 255;
+  var frontColor = 0;
+  var numColor = "#ffffff";
+  var colorToggle = false;
+
+  socket.on('initialize', function (data) {
+    console.log("initialize");
+  });
+  socket.on('countup', function (data) {
+    //console.log(num++);
+
+    $("#bang").text(data.num);
+    targetPoint.x = psObj.random(200,1200);
+    targetPoint.y = psObj.random(200,400);
+    playSound(soundBuffer);
+  });
+
+
+  socket.on('changeScene', function (data) {
+    num = 0;
+    $("#bang").text(num);
+    targetPoint.x = 0;
+    targetPoint.y = 0;
+    if(colorToggle){
+      backColor = 255;
+      frontColor = 0;
+      numColor = "#000000";
+    }else{
+      backColor = 0;
+      frontColor = 255;
+      numColor = "#ffffff";
+    }
+    $('#bang').css('color',numColor);
+    colorToggle = !colorToggle;
+  });
+
+  /*var anchor = [57,50,46,52,42,48,40,42,36,40,33,41,43,33,47,29,42,23,43,22,44,13,40,13,20,11,17,19,37,22,41,23,37,24,16,25,12,24,13,34,20,33,30,32,24,38,7,53,14,62,21,54,30,48,32,49,33,53,37,60,44,61,53,60,58,60,57,50];
+  var string = '[';
+  for(var i=0;i<anchor.length;i++){
+    
+    if(i%2==0){
+      string+= '{"x":'+anchor[i]+',';  
+    }else{
+      string+= '"y":'+anchor[i]+'},';
+    }
+    
+
+  }
+  string+=']';
+    console.log(string);*/
+
+  var num = 0;
+  var soundBuffer = null;
+  var context = new webkitAudioContext();
+  loadSound('audio/he.mp3');
+
+  function loadSound(url) {
+    var request = new XMLHttpRequest();
+    request.open('GET', url, true);
+    request.responseType = 'arraybuffer';
+
+    // Decode asynchronously
+    request.onload = function() {
+      context.decodeAudioData(request.response, function(buffer) {
+        soundBuffer = buffer;
+      });
+    }
+    request.send();
+  }
+
+  function playSound(buffer) {
+    var source = context.createBufferSource(); // creates a sound 
+    source.buffer = buffer;
+    source.connect(context.destination);       // connect the source 
+    source.noteOn(0);                          // play the source now
+  }
+
+  var psObj;
+  var danceFont;
+  var danceFont2;
+  var danceFont3;
+  var forcePoint;
+  var targetPoint;
+
+  $(document).ready(function() {
+      psObj = new Processing("world", sketchProc);    
+  });
+
+  function sketchProc(ps){
+    ps.setup = function() {
+      psObj = ps;
+      forcePoint = new ps.PVector(0,0);
+      targetPoint = new ps.PVector(0,0);
+      ps.frameRate(60);
+      ps.size($(window).width(),$(window).height());
+      var vec = new ps.PVector(20,20);
+      danceFont = new DanceFont(100,100,fontData["he"]);
+      danceFont2 = new DanceFont(600,100,fontData["xe"]);
+      danceFont3 = new DanceFont(1000,100,fontData["xx"]);
+    };
+
+    ps.draw = function() {
+      //var mouse = new ps.PVector(ps.mouseX,ps.mouseY);
+      forcePoint.x = (targetPoint.x - forcePoint.x)/10;
+      forcePoint.y = (targetPoint.y - forcePoint.y)/10;
+
+      ps.fill(frontColor,frontColor,frontColor);
+      danceFont.draw(targetPoint);
+      danceFont2.draw(targetPoint);
+      danceFont3.draw(targetPoint);
+      ps.fill(backColor,backColor,backColor,100);
+      ps.rect(0,0,ps.width,ps.height);
+    };
+  }
+
+
+</script>
+<script src="js/fonts.js"></script>
+  <style>
+    *{
+      font-size:30px;
+      margin:0;
+      padding:0;
+    }
+    body{
+      color:#000;
+      font-family:Helvetica, "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
+
+    }
+    #bang{
+      position: absolute;
+      color:#B6B6B6;
+      font-weight: bold;
+      left: 50%;
+      bottom:100px;
+      font-size:7em;
+      width:7em;
+      text-align: center;
+      margin-left:-3.5em;
+    }
+  </style>
+</head>
+<body>
+  <div id="bang">0</div>
+  <canvas id="world"></canvas>
+</body>
+</html>

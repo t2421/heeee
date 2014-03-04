@@ -1,0 +1,69 @@
+<!DOCTYPE HTML>
+<html>
+<meta charset="UTF-8">
+<meta content="width=320, minimum-scale=0.5,user-scalable=no" name="viewport" />
+
+  <title>controller</title>
+  <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>  
+  <script src="js/processing-1.4.1.min.js"></script>
+  <script src="http://localhost:7771/socket.io/socket.io.js"></script>
+<script>
+  var socket = io.connect('http://localhost:7771');
+  socket.on('initialize', function (data) {
+    console.log(data);
+    socket.emit('my other event', { my: 'data' });
+  });
+  $(document).ready(function() {
+    var canvas = document.getElementById('btn');
+    if ( ! canvas || ! canvas.getContext ) { return false; }
+    var ctx = canvas.getContext('2d');
+    ctx.beginPath();
+    ctx.arc(100, 100, 98, 0, Math.PI*2, false);
+    ctx.strokeStyle = "#ffffff"
+    ctx.stroke();
+    
+    ctx.fillStyle = "#0d92ff";
+    ctx.fill();
+
+
+    ctx.stroke();
+    $('#bang').click(function(event) {
+      socket.emit('bang',{num:1});
+    });
+  });
+
+
+</script>
+  <style>
+    *{
+      font-size:30px;
+      margin:0;
+      padding:0;
+      background: #f6f5f1;
+    }
+    body{
+      width: 320px;
+      overflow: hidden;
+      margin: 0 auto;
+      font-family:Helvetica, "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
+    }
+    #bang{
+      text-align: center;
+    }
+    canvas{
+      margin:96px auto;
+    }
+
+    header p{
+      padding-top: 20px;
+      color: #000000;
+      text-align: center;
+      font-size:15px;
+    }
+  </style>
+</head>
+<body>
+  <header><p>HE-SYSTEM 2014</p></header>
+  <div id="bang"><canvas id="btn" width="200" height="200"></canvas></div>
+</body>
+</html>
