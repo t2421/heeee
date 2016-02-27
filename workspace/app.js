@@ -1,23 +1,27 @@
-var app = require('http').createServer(handler)
-  , io = require('socket.io').listen(app)
-  , fs = require('fs')
-
-app.listen(7771);
-
+var app = require('express')();
+var express = require('express');
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
 var clickNumber = 0;
-function handler (req, res) {
-  res.writeHead(200,{"Acees-Control-Allow-Origin":"*"});
- /* fs.readFile(__dirname + '/index.html',
-  function (err, data) {
-    if (err) {
-      res.writeHead(500);
-      return res.end('Error loading index.html');
-    }
+var PORT = 7771;
+server.listen(PORT);
 
-    res.writeHead(200);
-    res.end(data);
-  });*/
-}
+console.log("connet//////");
+console.log("port:"+PORT);
+
+app.use(express.static('public'));
+
+app.get('/view', function (req, res) {
+  res.sendfile(__dirname + '/view.html');
+});
+
+app.get('/management', function (req, res) {
+  res.sendfile(__dirname + '/management.html');
+});
+
+app.get('/controller', function (req, res) {
+  res.sendfile(__dirname + '/controller.html');
+});
 
 io.sockets.on('connection', function (socket) {
   socket.emit('initialize', { hello: 'world' });
