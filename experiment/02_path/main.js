@@ -38,6 +38,7 @@ jQuery(document).ready(function($) {
 	var path = [];
 	var endPoint = [];
 	var start = [];
+	var vertices = [];
 	for (var i = 0; i < typo0.length; i++) {
 		var type = typo0[i].lineType;
 		var points = typo0[i].points;
@@ -72,11 +73,7 @@ jQuery(document).ready(function($) {
 	};
 
 
-	var combinedGeometry = mergeMeshes(path);
-	var material = new THREE.MeshBasicMaterial({ side:THREE.DoubleSide });
-	var fontMesh = new THREE.Mesh(combinedGeometry,material);
-	scene.add(fontMesh);
-	console.log(combinedGeometry);
+	
 	for (i = 0; i < path.length; i++) {
 		
 		var vertices = path[i].geometry.vertices;
@@ -85,7 +82,7 @@ jQuery(document).ready(function($) {
 			vertices[j].y += Math.random()*2-1.5;
 		};
 		
-		//scene.add(path[i]);
+		scene.add(path[i]);
 		
 	};
 
