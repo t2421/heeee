@@ -48,27 +48,35 @@ jQuery(document).ready(function($) {
 		};
 
 		if(type == "MOVETO"){
-			endPoint = [points[0],points[1]];
-			start = [points[0],points[1]];
+			endPoint = new THREE.Vector3(points[0],points[1], 0);
+			start =  new THREE.Vector3(points[0],points[1], 0);
+			vertices.push(endPoint);
+			vertices.push(endPoint);
 		}
 
 		if(type == "CUBICTO"){
-			path.push(getCubicCurve(endPoint[0],endPoint[1],points[0],points[1],points[2],points[3],points[4],points[5]));
-			endPoint = [points[4],points[5]];
+			var tmpEndPoint = new THREE.Vector3(points[4],points[5], 0);
+			path.push(getCubicCurve(endPoint,points[0],points[1],points[2],points[3],tmpEndPoint));
+			endPoint = tmpEndPoint;
+			vertices.push(endPoint);
 		}
 
 		if(type == "QUADTO"){
-			path.push(getQuadCurve(endPoint[0],endPoint[1],points[0],points[1],points[2],points[3]));
-			endPoint = [points[2],points[3]];
+			var tmpEndPoint = new THREE.Vector3(points[2],points[3], 0);
+			path.push(getQuadCurve(endPoint,points[0],points[1],tmpEndPoint));
+			endPoint = tmpEndPoint;
+			vertices.push(endPoint);
 		}
 
 		if(type == "LINETO"){
-			path.push(getLine(endPoint[0],endPoint[1],points[0],points[1]));
-			endPoint = [points[0],points[1]];
+			var tmpEndPoint = new THREE.Vector3(points[0],points[1], 0);
+			path.push(getLine(endPoint,tmpEndPoint));
+			endPoint = tmpEndPoint;
+			vertices.push(endPoint);
 		}
 
 		if(type == "CLOSETO"){
-			path.push(getLine(endPoint[0],endPoint[1],start[0],start[1]));
+			path.push(getLine(endPoint,start));
 		}
 	};
 
@@ -77,11 +85,7 @@ jQuery(document).ready(function($) {
 	for (i = 0; i < path.length; i++) {
 		
 		var vertices = path[i].geometry.vertices;
-		for (j = 0; j < vertices.length; j++) {
-			vertices[j].x += Math.random()*2-1.5;
-			vertices[j].y += Math.random()*2-1.5;
-		};
-		
+		console.log(path[i]);
 		scene.add(path[i]);
 		
 	};
@@ -89,36 +93,36 @@ jQuery(document).ready(function($) {
 
 	
 	render();
-	function getLine(x0,y0,x1,y1){
+	function getLine(v0,v1){
 		var geometry = new THREE.Geometry();
-		geometry.vertices.push(new THREE.Vector3(x0,y0, 0));
-		geometry.vertices.push(new THREE.Vector3(x1,y1, 0));
+		geometry.vertices.push(v0);
+		geometry.vertices.push(v1);
 		var material = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );
 		var line = new THREE.Line(geometry, material);
 		return line;
 	}
 
-	function getQuadCurve(x0,y0,x1,y1,x2,y2){
+	function getQuadCurve(v0,x1,y1,v2){
 		SUBDIVISIONS = 10;
 		var geometry = new THREE.Geometry();
 		var curve = new THREE.QuadraticBezierCurve3();
-		curve.v0 = new THREE.Vector3(x0, y0, 0);
+		curve.v0 = v0;
 		curve.v1 = new THREE.Vector3(x1, y1, 0);
-		curve.v2 = new THREE.Vector3(x2, y2, 0);
+		curve.v2 = v2;
 		geometry.vertices = curve.getPoints( SUBDIVISIONS );
 		material = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );
 		var line = new THREE.Line(geometry, material);
 		return line;
 	}
 
-	function getCubicCurve(x0,y0,x1,y1,x2,y2,x3,y3){
+	function getCubicCurve(v0,x1,y1,x2,y2,v3){
 		SUBDIVISIONS = 10;
 		var geometry = new THREE.Geometry();
 		var curve = new THREE.CubicBezierCurve3();
-		curve.v0 = new THREE.Vector3(x0, y0, 0);
+		curve.v0 = v0;
 		curve.v1 = new THREE.Vector3(x1, y1, 0);
 		curve.v2 = new THREE.Vector3(x2, y2, 0);
-		curve.v3 = new THREE.Vector3(x3, y3, 0);
+		curve.v3 = v3;
 
 		geometry.vertices = curve.getPoints( SUBDIVISIONS );
 		
@@ -130,14 +134,5 @@ jQuery(document).ready(function($) {
 
 	}
 
-	function mergeMeshes (meshes) {
-	  var combined = new THREE.Geometry();
-
-	  for (var i = 0; i < meshes.length; i++) {
-	    meshes[i].updateMatrix();
-	    combined.merge(meshes[i].geometry, meshes[i].matrix);
-	  }
-
-	  return combined;
-	}
+	
 });
